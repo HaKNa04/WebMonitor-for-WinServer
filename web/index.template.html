@@ -1,0 +1,347 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <!-- 移除整页 meta 刷新，改为前端轮询 data.js -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>服务器监控仪表盘</title>
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --bg: #0f1117;
+            --card: #171923;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #22d3ee;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --orange: #f97316;
+            --red: #ef4444;
+            --cpu-chart-h: 175px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Consolas, ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", monospace;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        h2, h3 {
+            margin: 0 0 8px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(160px, auto);
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid #1f2430;
+            border-radius: 10px;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 2px 8px;
+            font-size: 14px;
+        }
+
+            .kv .muted {
+                white-space: nowrap;
+            }
+
+        .gauge-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .gauge {
+            position: relative;
+            height: 180px;
+        }
+
+            .gauge canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .gauge > .center.small.muted {
+                margin-top: -40px;
+            }
+
+        .center {
+            text-align: center;
+        }
+
+        .small {
+            font-size: 12px;
+        }
+
+        .metric-big {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .text-green {
+            color: var(--green);
+        }
+
+        .text-yellow {
+            color: var(--yellow);
+        }
+
+        .text-orange {
+            color: var(--orange);
+        }
+
+        .text-red {
+            color: var(--red);
+        }
+
+        .metric-line {
+            font-size: 16px;
+            margin: 8px 0;
+        }
+
+        .bar-container {
+            max-height: calc(100% - 28px);
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+            .bar-container.grid2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 6px 12px;
+            }
+
+        .bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 0;
+        }
+
+        .bar-label {
+            width: 40px;
+            white-space: nowrap;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 14px;
+            border-radius: 7px;
+            background: #222533;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            border-radius: 7px;
+        }
+
+        .bar-pct {
+            width: 25px;
+            text-align: right;
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .sep {
+            height: 1px;
+            background: #23283a;
+            margin: 10px 0;
+        }
+
+        #cell-cpu-total {
+            grid-row: 1;
+            grid-column: 1;
+        }
+
+        #cell-cores {
+            grid-row: 2 / span 3;
+            grid-column: 1;
+        }
+
+        #cell-sys {
+            grid-row: 1;
+            grid-column: 2;
+        }
+
+        #cell-cpu {
+            grid-row: 2;
+            grid-column: 2;
+        }
+
+        #cell-net {
+            grid-row: 3;
+            grid-column: 2;
+        }
+
+        #cell-disk {
+            grid-row: 4;
+            grid-column: 2;
+        }
+
+        #cell-sw {
+            grid-row: 1;
+            grid-column: 3;
+        }
+
+        #cell-proc {
+            grid-row: 2 / span 3;
+            grid-column: 3;
+        }
+
+        #cell-custom {
+            grid-row: 1 / span 4;
+            grid-column: 4;
+        }
+        /* 最右侧自定义区域 */
+
+        #cell-cpu-total .chart-wrap {
+            height: var(--cpu-chart-h);
+        }
+
+        #cell-cpu-total h3 {
+            margin-bottom: 6px;
+        }
+
+        #cell-cpu-total canvas {
+            width: 100%;
+            height: 100% !important;
+        }
+
+        #cell-cpu h3 {
+            margin-bottom: 4px;
+        }
+
+        #cell-cpu .gauge-row {
+            margin-top: 0;
+        }
+
+        /* 自定义区域样式 */
+        .custom-box {
+            display: block;
+        }
+
+        .custom-iframe {
+            width: 100%;
+            height: 62vh;
+            min-height: 360px;
+            border: 1px solid #1f2430;
+            border-radius: 8px;
+            background: #0b0d12;
+        }
+
+        .custom-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .btn-big {
+            display: block;
+            text-align: center;
+            background: var(--accent);
+            color: #0f1117;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            margin-top: 6px;
+        }
+
+            .btn-big:hover {
+                filter: brightness(1.08);
+            }
+    </style>
+</head>
+<body>
+    <div class="grid">
+        <div id="cell-cpu-total" class="card">
+            <h3>CPU 总体占用率</h3>
+            <div class="chart-wrap">
+                <canvas id="cpuTotalChart"></canvas>
+            </div>
+        </div>
+
+        <div id="cell-cores" class="card">
+            <h3>CPU 逻辑核心占用率</h3>
+            <div class="bar-container" id="cpuCoresBars"></div>
+        </div>
+
+        <div id="cell-sys" class="card">
+            <h3>服务器概况</h3>
+            <div class="kv" id="sysInfoBox"></div>
+        </div>
+
+        <div id="cell-cpu" class="card">
+            <h3>服务器传感器信息</h3>
+            <div class="gauge-row">
+                <div class="gauge"><canvas id="gaugeFreq"></canvas><div class="center small muted">CPU 当前频率 (MHz)</div></div>
+                <div class="gauge"><canvas id="gaugeFan"></canvas><div class="center small muted">CPU FAN 转速 (RPM)</div></div>
+                <div class="gauge"><canvas id="gaugeTemp"></canvas><div class="center small muted">CPU Core 温度 (°C)</div></div>
+            </div>
+        </div>
+
+        <div id="cell-net" class="card">
+            <h3>服务器网络传输速率</h3>
+            <div id="netText" class="center" style="margin-top:12px"></div>
+        </div>
+
+        <div id="cell-disk" class="card">
+            <h3>服务器磁盘读写速率</h3>
+            <div id="diskText" class="center" style="margin-top:12px"></div>
+        </div>
+
+        <div id="cell-sw" class="card">
+            <h3>软件版本</h3>
+            <div class="kv" id="swBox"></div>
+        </div>
+
+        <div id="cell-proc" class="card">
+            <h3>进程检测</h3>
+            <div class="kv" id="procBox"></div>
+
+            <div class="sep"></div>
+            <div class="small muted">CPU 占用 TOP 10</div>
+            <div class="kv" id="topProcBox"></div>
+        </div>
+
+        <div id="cell-custom" class="card">
+            <h3>自定义区域</h3>
+            <div id="customBox" class="custom-box"></div>
+        </div>
+    </div>
+
+    <script src="chart.4.4.4.min.js"></script>
+    <script src="data.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
