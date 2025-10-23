@@ -4,7 +4,7 @@
 # =========================
 
 # 禁用数据库（仅显示，不入库）
-DEFAULT_DISABLE_DB = False
+DEFAULT_DISABLE_DB = True
 
 # 调试开关
 DEFAULT_DEBUG = False
@@ -29,7 +29,7 @@ DEFAULT_WEB_SERVER_PATH = r""
 
 # 需要执行搜索的进程名字符串，分号或逗号分隔，使用“显示名=路径子串”（大小写不敏感，按 exe 完整路径连续子串匹配）
 # example: "Nginx=nginx.exe;Java=\\Java\\;Python=python.exe;DDNS=ddns-go.exe;MariaDB=mysqld.exe;MCSM=mcsm;NapCat=napcat;OpenSSH=sshd.exe;Frpc=frpc.exe"
-DEFAULT_PROCESS_NAMES = ""
+DEFAULT_PROCESS_NAMES = "test1=test1;Nginx=nginx.exe;Java=\\Java\\;MariaDB=mysqld.exe"
 
 # 采样周期（秒）
 DEFAULT_INTERVAL = 5
@@ -72,3 +72,6 @@ DEFAULT_JS_TEMPLATE_PATH   = os.path.join(os.path.dirname(__file__), "web", "das
 
 # 本地 Chart.js 路径（建议放置于 web 目录）
 DEFAULT_CHART_JS_PATH = os.path.join(os.path.dirname(__file__), "web", "chart.4.4.4.min.js")
+
+# 自定义信息区
+DEFAULT_CUSTOM_AREA = {"img": "https://http.cat/200.jpg"}

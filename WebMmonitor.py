@@ -559,7 +559,7 @@ def main():
                 },
                 "poll_ms": int(max(1, args.interval) * 1000),
                 "top_procs": top_procs,
-                "custom_area": {"img":"https://haviss.cn/MCSMResources/10.webp"},  # 可填 {"html":"..."} 或 {"kv":[["键","值"], ...]}
+                "custom_area": DEFAULT_CUSTOM_AREA,
                 "generated_at": f"{ts.strftime('%Y-%m-%d %H:%M:%S')} UTC",
             }
 
