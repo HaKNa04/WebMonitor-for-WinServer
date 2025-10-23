@@ -66,3 +66,21 @@
 - 显存总量显示 N/A
   - 需要 LHM 或 NVML 或 WMI 的支持（不同系统/驱动可能不可用）
   - 目前只兼容了 NVIDIA GPU ，后续可能会修改代码以适配 AMD GPU 和 Intel GPU ?
+
+---
+
+## License
+- Project License: Apache-2.0（见 `LICENSE`）
+- Third-party Licenses:
+  - MPL-2.0 正文：`LICENSES/MPL-2.0.txt`
+  - 上游随附第三方告知：`THIRD_PARTY/THIRD-PARTY-NOTICES.txt`
+
+## Third-party
+- LibreHardwareMonitorLib.dll（MPL-2.0）
+  - Binary: `./LibreHardwareMonitorLib.dll`
+  - Upstream: https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+  - Exact commit: `b807743`
+  - Source provided at: `THIRD_PARTY/source-b807743.zip`
+  - Hash (SHA-256): 见 `THIRD_PARTY/LibreHardwareMonitorLib.SHA256.txt`
+  - License text: `LICENSES/MPL-2.0.txt`
+  - Additional notices from upstream: `THIRD_PARTY/THIRD-PARTY-NOTICES.txt`
