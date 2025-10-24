@@ -5,6 +5,8 @@
 - 后端：`WebMmonitor.py` 定时采集并输出数据（可选写入 DB）
 - 前端：`web/index.template.html` + `web/dashboard.template.js` + `chart.4.4.4.min.js`
 - 存储：可选 DB 持久化（自动建库建表），或纯文件模式（仅生成静态页面与 `data.js`）
+  
+![演示图](./demo_png/demo.png)
 
 ---
 
